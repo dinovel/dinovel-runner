@@ -7,8 +7,8 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "dinovel-runner",
-    "version": "0.1.0"
+    "productName": "dnr",
+    "version": "0.2.0"
   },
   "tauri": {
     "allowlist": {
@@ -17,6 +17,14 @@
         "all": true,
         "scope": ["**"]
       }
+    },
+    "cli": {
+      "description": "Starts a window that navigates to a URL",
+      "args": [{
+        "numberOfValues": 1,
+        "name": "env",
+        "description": "The environment to use on config file"
+      }]
     },
     "bundle": {
       "active": true,

@@ -4,6 +4,7 @@ pub(crate) struct AppArgs {
 
 pub(crate) fn read_args() -> AppArgs {
   let args: Vec<String> = std::env::args().collect();
+  print_args();
 
   let mut app_args = AppArgs {
     env: "".to_string()
@@ -22,4 +23,10 @@ pub(crate) fn read_args() -> AppArgs {
   app_args
 }
 
+fn print_args() {
+  let args = std::env::args();
 
+  for a in args {
+    println!("Rag: {}", a);
+  }
+}
