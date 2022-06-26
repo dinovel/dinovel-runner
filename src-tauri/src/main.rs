@@ -14,7 +14,7 @@ mod spawn_server;
 pub mod app_conf;
 pub mod conf_handler;
 pub mod port_scanner;
-pub mod args_reader;
+pub mod tauri_args;
 
 lazy_static! {
   static ref SERVER_ADDRESS: MutStatic<String> = {
@@ -28,14 +28,13 @@ fn server_address() -> String {
 }
 
 fn main() {
-  let app_args = args_reader::read_args();
+  let context = tauri::generate_context!();
+  let app_args = tauri_args::read_args(&context);
   let server = Arc::new(Mutex::new(spawn_server::spawn(app_args.env.as_str())));
 
   SERVER_ADDRESS.write()
     .unwrap()
     .push_str(server.lock().unwrap().to_string().as_str());
-
-  let context = tauri::generate_context!();
 
   tauri::Builder::default()
     .on_window_event(move |event| match event.event() {
