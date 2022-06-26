@@ -9,7 +9,6 @@ pub(crate) struct AppConfig {
   pub fullscreen: bool,
   pub mode: String,
   pub target: String,
-  pub auto_port: bool,
 }
 
 #[derive(Debug, PartialEq, EnumString, Display)]
@@ -27,7 +26,6 @@ impl AppConfig {
       fullscreen: false,
       mode: AppConfigMode::Url.to_string(),
       target: "https://duckduckgo.com".to_string(),
-      auto_port: false,
     }
   }
 }

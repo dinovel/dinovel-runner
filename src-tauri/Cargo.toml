@@ -20,6 +20,8 @@ serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "1.0.0", features = ["api-all"] }
 strum = "0.24"
 strum_macros = "0.24"
+mut_static = "5.0.0"
+lazy_static = "1.4.0"
 
 [features]
 # by default Tauri runs in production mode

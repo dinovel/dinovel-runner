@@ -3,18 +3,50 @@
   windows_subsystem = "windows"
 )]
 
+#[macro_use]
+extern crate lazy_static;
+
+use std::sync::{Mutex, Arc};
+use mut_static::MutStatic;
+
 mod spawn_server;
 
 pub mod app_conf;
 pub mod conf_handler;
+pub mod port_scanner;
+pub mod args_reader;
+
+lazy_static! {
+  static ref SERVER_ADDRESS: MutStatic<String> = {
+    MutStatic::from("".to_string())
+  };
+}
+
+#[tauri::command]
+fn server_address() -> String {
+  SERVER_ADDRESS.read().unwrap().to_string()
+}
 
 fn main() {
-  spawn_server::spawn();
+  let app_args = args_reader::read_args();
+  let server = Arc::new(Mutex::new(spawn_server::spawn(app_args.env.as_str())));
+
+  SERVER_ADDRESS.write()
+    .unwrap()
+    .push_str(server.lock().unwrap().to_string().as_str());
 
   let context = tauri::generate_context!();
 
-  let app = tauri::Builder::default();
-  
-  app.run(context)
+  tauri::Builder::default()
+    .on_window_event(move |event| match event.event() {
+      tauri::WindowEvent::Destroyed => {
+        server.lock().unwrap().kill();
+      }
+      _ => {}
+    })
+    .invoke_handler(tauri::generate_handler![
+      server_address
+    ])
+    .run(context)
     .expect("error while running tauri application");
 }

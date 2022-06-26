@@ -1,9 +1,8 @@
 import { appWindow } from '@tauri-apps/api/window';
-
-const app = document.querySelector<HTMLDivElement>('#app')!
+import { invoke } from '@tauri-apps/api/tauri';
 
 appWindow.setTitle("Dinovel!")
 
-app.innerHTML = `
-  <h1>Hello Dinovel!</h1>
-`
+setTimeout(async () => {
+  window.location.href = await invoke('server_address');
+}, 0);

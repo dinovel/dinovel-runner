@@ -2,17 +2,17 @@ use serde_json::Value;
 
 use crate::app_conf::AppConfig;
 
-const CONFIG_FILE: &str = ".conf.json";
+const CONFIG_FILE: &str = ".dnr";
 
-pub(crate) fn read_config() -> AppConfig {
-  ensure_updated();
+pub(crate) fn read_config(env: &str) -> AppConfig {
+  ensure_updated(env);
 
-  return read_safe_config();
+  return read_safe_config(env);
 }
 
 /* Ensure .conf.json is updated to latest structure */
-fn ensure_updated() -> () {
-  let json = read_dyn_config();
+fn ensure_updated(env: &str) -> () {
+  let json = read_dyn_config(&env);
   let mut config = AppConfig::default();
 
   match json.get("title") {
@@ -45,23 +45,19 @@ fn ensure_updated() -> () {
     None => {}
   };
 
-  match json.get("auto_port") {
-    Some(v) => config.auto_port = v.as_bool().unwrap(),
-    None => {}
-  };
-
-  write_config(config);
+  write_config(config, env);
 }
 
-fn write_config(config: AppConfig) -> () {
+fn write_config(config: AppConfig, env: &str) -> () {
   let txt_json = serde_json::to_string(&config).expect("Failed to serialize config");
-  let path = std::path::Path::new(CONFIG_FILE);
+  let conf_name = build_config_path(env);
+  let path = std::path::Path::new(conf_name.as_str());
 
   std::fs::write(path, txt_json).expect("Failed to write config");
 }
 
-fn read_dyn_config() -> Value {
-  let txt = match read_txt_config() {
+fn read_dyn_config(env: &str) -> Value {
+  let txt = match read_txt_config(env) {
     Some(txt) => txt,
     None => "{}".to_string(),
   };
@@ -74,8 +70,9 @@ fn read_dyn_config() -> Value {
   };
 }
 
-fn read_txt_config() -> Option<String> {
-  let path = std::path::Path::new(CONFIG_FILE);
+fn read_txt_config(env: &str) -> Option<String> {
+  let conf_name = build_config_path(env);
+  let path = std::path::Path::new(conf_name.as_str());
 
   if !path.exists() { return None; }
 
@@ -85,7 +82,12 @@ fn read_txt_config() -> Option<String> {
   };
 }
 
-fn read_safe_config() -> AppConfig {
-  let txt = read_txt_config().expect("Failed to read config file");
+fn read_safe_config(env: &str) -> AppConfig {
+  let txt = read_txt_config(env).expect("Failed to read config file");
   return serde_json::from_str::<AppConfig>(txt.as_str()).expect("Failed to deserialize config");
+}
+
+fn build_config_path(env: &str) -> String {
+  format!("{}.{}.json", CONFIG_FILE, env)
+    .replace("..", ".")
 }
